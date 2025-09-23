@@ -128,12 +128,12 @@ export default function ECGBillCalculator() {
   const resetRates = () => setRates(initialRates);
 
   return (
-    <div className="min-h-screen py-10 px-4">
+    <div className="min-h-screen py-6 sm:py-10 px-0 sm:px-4 overflow-x-hidden">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-3xl font-bold tracking-tight mb-6">ECG Bill Calculator</h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <section className="glass card">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          <section className="glass card rounded-none sm:rounded-2xl p-4 sm:p-6">
             <h2 className="text-lg font-semibold mb-4">Inputs</h2>
 
             <div className="flex items-center justify-between mb-4">
@@ -179,7 +179,7 @@ export default function ECGBillCalculator() {
               </div>
             )}
 
-            <div className="mt-6 flex items-center gap-3">
+            <div className="mt-6 hidden sm:flex items-center gap-3">
               <button onClick={calculateBill} className="btn-primary">Calculate Bill</button>
               <button onClick={() => { setPrevReading(0); setCurrReading(0); setBillingDays(31); setPrevBalance(0); setPayments(0); setResults(null); }} className="btn-secondary">Clear</button>
             </div>
@@ -201,7 +201,7 @@ export default function ECGBillCalculator() {
 
               {showRateEditor && (
                 <div className="mt-4">
-                  <div className="flex items-center gap-3 mb-3">
+                  <div className="flex items-center gap-3 mb-3 px-1">
                     <span className="text-sm text-gray-600">Editing:</span>
                     <select value={tariffType} onChange={(e) => setTariffType(e.target.value as TariffKey)} className="input bg-white">
                       <option value="residential">Residential</option>
@@ -215,8 +215,8 @@ export default function ECGBillCalculator() {
                     {rates[tariffType].map((band, index) => {
                       const isInfinity = band.limit === Infinity;
                       return (
-                        <div key={index} className="grid grid-cols-12 gap-3 items-end glass p-3">
-                          <div className="col-span-5">
+                        <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end glass p-3 rounded-none sm:rounded-xl">
+                          <div className="md:col-span-5 col-span-full">
                             <label className="label">Limit (kWh)</label>
                             {isInfinity ? (
                               <div className="px-3 py-2 h-[38px] flex items-center input" style={{ background: "var(--surface)", color: "var(--muted)" }}>∞</div>
@@ -224,11 +224,11 @@ export default function ECGBillCalculator() {
                               <input type="number" value={Number.isFinite(band.limit) ? band.limit : 0} onChange={(e) => updateBand(tariffType, index, { limit: Number(e.target.value) })} className="input" />
                             )}
                           </div>
-                          <div className="col-span-5">
+                          <div className="md:col-span-5 col-span-full">
                             <label className="label">Rate (GHS/kWh)</label>
                             <input type="number" step="0.0001" value={band.rate} onChange={(e) => updateBand(tariffType, index, { rate: Number(e.target.value) })} className="input" />
                           </div>
-                          <div className="col-span-2">
+                          <div className="md:col-span-2 col-span-full">
                             <button disabled={isInfinity} onClick={() => removeBand(tariffType, index)} className={`w-full btn-secondary ${isInfinity ? "opacity-40 cursor-not-allowed" : ""}`}>Remove</button>
                           </div>
                         </div>
@@ -240,7 +240,7 @@ export default function ECGBillCalculator() {
             </div>
           </section>
 
-          <section className="glass card">
+          <section className="glass card rounded-none sm:rounded-2xl p-4 sm:p-6">
             <h2 className="text-lg font-semibold mb-4">Results</h2>
 
             {!results ? (
@@ -249,40 +249,40 @@ export default function ECGBillCalculator() {
               <div className="space-y-6">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div className="border rounded-xl p-3">
-                    <div className="text-xs text-gray-500">Units</div>
+                  <div className="text-xs text-gray-500 break-words">Units</div>
                     <div className="text-xl font-semibold">{results.units} kWh</div>
                   </div>
                   <div className="border rounded-xl p-3">
-                    <div className="text-xs text-gray-500">Energy Cost</div>
+                    <div className="text-xs text-gray-500 break-words">Energy Cost</div>
                     <div className="text-xl font-semibold">GHS {results.energyCost.toFixed(2)}</div>
                   </div>
                   <div className="border rounded-xl p-3">
-                    <div className="text-xs text-gray-500">Service Charge</div>
+                    <div className="text-xs text-gray-500 break-words">Service Charge</div>
                     <div className="text-xl font-semibold">GHS {results.serviceCharge.toFixed(2)}</div>
                   </div>
                   <div className="border rounded-xl p-3">
-                    <div className="text-xs text-gray-500">Total Bill</div>
+                    <div className="text-xs text-gray-500 break-words">Total Bill</div>
                     <div className="text-xl font-semibold">GHS {results.totalBill.toFixed(2)}</div>
                   </div>
                 </div>
 
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span>Nat&#39;l Elect Levy (2%)</span>
+                    <span className="break-words">Nat&#39;l Elect Levy (2%)</span>
                     <span>GHS {results.natElectLevy.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Street Light (3%)</span>
+                    <span className="break-words">Street Light (3%)</span>
                     <span>GHS {results.streetLight.toFixed(2)}</span>
                   </div>
                   {tariffType === "nonResidential" && (
                     <>
                       <div className="flex justify-between">
-                        <span>NHIL & GETFund (5%)</span>
+                        <span className="break-words">NHIL & GETFund (5%)</span>
                         <span>GHS {results.nhilGetFund.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>VAT (15%)</span>
+                        <span className="break-words">VAT (15%)</span>
                         <span>GHS {results.vat.toFixed(2)}</span>
                       </div>
                     </>
@@ -297,20 +297,20 @@ export default function ECGBillCalculator() {
                 <div>
                   <h3 className="text-base font-semibold mb-2">Band Breakdown</h3>
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm rounded-xl overflow-hidden" style={{ border: "1px solid var(--outline)" }}>
+                    <table className="w-full text-sm rounded-xl overflow-hidden" style={{ border: "1px solid var(--outline)", tableLayout: "fixed" }}>
                       <thead style={{ background: "var(--surface)" }}>
                         <tr>
-                          <th className="text-left p-2" style={{ borderBottom: "1px solid var(--outline)" }}>Units (kWh)</th>
-                          <th className="text-left p-2" style={{ borderBottom: "1px solid var(--outline)" }}>Rate (GHS/kWh)</th>
-                          <th className="text-left p-2" style={{ borderBottom: "1px solid var(--outline)" }}>Cost (GHS)</th>
+                          <th className="text-left p-2 break-words" style={{ borderBottom: "1px solid var(--outline)" }}>Units (kWh)</th>
+                          <th className="text-left p-2 break-words" style={{ borderBottom: "1px solid var(--outline)" }}>Rate (GHS/kWh)</th>
+                          <th className="text-left p-2 break-words" style={{ borderBottom: "1px solid var(--outline)" }}>Cost (GHS)</th>
                         </tr>
                       </thead>
                       <tbody>
                         {results.bandBreakdown.map((b, i) => (
                           <tr key={i}>
-                            <td className="p-2" style={{ borderTop: "1px solid var(--outline)" }}>{b.used}</td>
-                            <td className="p-2" style={{ borderTop: "1px solid var(--outline)" }}>{b.rate.toFixed(4)}</td>
-                            <td className="p-2" style={{ borderTop: "1px solid var(--outline)" }}>{b.cost.toFixed(2)}</td>
+                            <td className="p-2 break-words" style={{ borderTop: "1px solid var(--outline)" }}>{b.used}</td>
+                            <td className="p-2 break-words" style={{ borderTop: "1px solid var(--outline)" }}>{b.rate.toFixed(4)}</td>
+                            <td className="p-2 break-words" style={{ borderTop: "1px solid var(--outline)" }}>{b.cost.toFixed(2)}</td>
                           </tr>
                         ))}
                       </tbody>
