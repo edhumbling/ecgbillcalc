@@ -146,12 +146,12 @@ export default function ECGBillCalculator() {
   const resetRates = () => setRates(initialRates);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4">
+    <div className="min-h-screen py-10 px-4">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-3xl font-bold tracking-tight mb-6">ECG Bill Calculator</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <section className="bg-white border rounded-2xl shadow-sm p-6">
+          <section className="glass card">
             <h2 className="text-lg font-semibold mb-4">Inputs</h2>
 
             <div className="flex items-center justify-between mb-4">
@@ -171,7 +171,7 @@ export default function ECGBillCalculator() {
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1" htmlFor="prevReading">
+                <label className="label" htmlFor="prevReading">
                   Previous Reading (kWh)
                 </label>
                 <input
@@ -179,11 +179,11 @@ export default function ECGBillCalculator() {
                   type="number"
                   value={prevReading}
                   onChange={(e) => setPrevReading(Number(e.target.value))}
-                  className="w-full border rounded-lg px-3 py-2"
+                  className="input"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" htmlFor="currReading">
+                <label className="label" htmlFor="currReading">
                   Current Reading (kWh)
                 </label>
                 <input
@@ -191,7 +191,7 @@ export default function ECGBillCalculator() {
                   type="number"
                   value={currReading}
                   onChange={(e) => setCurrReading(Number(e.target.value))}
-                  className="w-full border rounded-lg px-3 py-2"
+                  className="input"
                 />
               </div>
             </div>
@@ -199,7 +199,7 @@ export default function ECGBillCalculator() {
             {!quickMode && (
               <div className="mt-4 grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1" htmlFor="billingDays">
+                  <label className="label" htmlFor="billingDays">
                     Billing Days
                   </label>
                   <input
@@ -207,11 +207,11 @@ export default function ECGBillCalculator() {
                     type="number"
                     value={billingDays}
                     onChange={(e) => setBillingDays(Number(e.target.value))}
-                    className="w-full border rounded-lg px-3 py-2"
+                    className="input"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1" htmlFor="prevBalance">
+                  <label className="label" htmlFor="prevBalance">
                     Previous Balance (GHS)
                   </label>
                   <input
@@ -219,11 +219,11 @@ export default function ECGBillCalculator() {
                     type="number"
                     value={prevBalance}
                     onChange={(e) => setPrevBalance(Number(e.target.value))}
-                    className="w-full border rounded-lg px-3 py-2"
+                    className="input"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1" htmlFor="payments">
+                  <label className="label" htmlFor="payments">
                     Payments Made (GHS)
                   </label>
                   <input
@@ -231,18 +231,18 @@ export default function ECGBillCalculator() {
                     type="number"
                     value={payments}
                     onChange={(e) => setPayments(Number(e.target.value))}
-                    className="w-full border rounded-lg px-3 py-2"
+                    className="input"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1" htmlFor="tariffType">
+                  <label className="label" htmlFor="tariffType">
                     Tariff Type
                   </label>
                   <select
                     id="tariffType"
                     value={tariffType}
                     onChange={(e) => setTariffType(e.target.value as TariffKey)}
-                    className="w-full border rounded-lg px-3 py-2 bg-white"
+                    className="input bg-white"
                   >
                     <option value="residential">Residential</option>
                     <option value="nonResidential">Non-Residential</option>
@@ -254,7 +254,7 @@ export default function ECGBillCalculator() {
             <div className="mt-6 flex items-center gap-3">
               <button
                 onClick={calculateBill}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                className="btn-primary"
               >
                 Calculate Bill
               </button>
@@ -267,13 +267,13 @@ export default function ECGBillCalculator() {
                   setPayments(0);
                   setResults(null);
                 }}
-                className="px-4 py-2 rounded-lg border hover:bg-gray-50"
+                className="btn-secondary"
               >
                 Clear
               </button>
             </div>
 
-            <div className="mt-8 border-t pt-6">
+            <div className="mt-8" style={{ borderTop: "1px solid var(--outline)" }}>
               <div className="flex items-center justify-between">
                 <h3 className="text-base font-semibold">Tariff Rates</h3>
                 <button
@@ -291,20 +291,20 @@ export default function ECGBillCalculator() {
                     <select
                       value={tariffType}
                       onChange={(e) => setTariffType(e.target.value as TariffKey)}
-                      className="border rounded-lg px-3 py-2 bg-white"
+                      className="input bg-white"
                     >
                       <option value="residential">Residential</option>
                       <option value="nonResidential">Non-Residential</option>
                     </select>
                     <button
                       onClick={() => addBandBeforeInfinity(tariffType)}
-                      className="ml-auto px-3 py-1.5 text-sm rounded-lg border hover:bg-gray-50"
+                      className="ml-auto btn-secondary text-sm"
                     >
                       Add band
                     </button>
                     <button
                       onClick={resetRates}
-                      className="px-3 py-1.5 text-sm rounded-lg border hover:bg-gray-50"
+                      className="btn-secondary text-sm"
                     >
                       Reset to defaults
                     </button>
@@ -314,16 +314,13 @@ export default function ECGBillCalculator() {
                     {rates[tariffType].map((band, index) => {
                       const isInfinity = band.limit === Infinity;
                       return (
-                        <div
-                          key={index}
-                          className="grid grid-cols-12 gap-3 items-end bg-gray-50 border rounded-xl p-3"
-                        >
+                        <div key={index} className="grid grid-cols-12 gap-3 items-end glass p-3">
                           <div className="col-span-5">
-                            <label className="block text-sm font-medium mb-1">
+                            <label className="label">
                               Limit (kWh)
                             </label>
                             {isInfinity ? (
-                              <div className="px-3 py-2 h-[38px] flex items-center border rounded-lg bg-gray-100 text-gray-500">
+                              <div className="px-3 py-2 h-[38px] flex items-center input" style={{ background: "var(--surface)", color: "var(--muted)" }}>
                                 ∞
                               </div>
                             ) : (
@@ -335,12 +332,12 @@ export default function ECGBillCalculator() {
                                     limit: Number(e.target.value),
                                   })
                                 }
-                                className="w-full border rounded-lg px-3 py-2"
+                                className="input"
                               />
                             )}
                           </div>
                           <div className="col-span-5">
-                            <label className="block text-sm font-medium mb-1">
+                            <label className="label">
                               Rate (GHS/kWh)
                             </label>
                             <input
@@ -352,17 +349,17 @@ export default function ECGBillCalculator() {
                                   rate: Number(e.target.value),
                                 })
                               }
-                              className="w-full border rounded-lg px-3 py-2"
+                              className="input"
                             />
                           </div>
                           <div className="col-span-2">
                             <button
                               disabled={isInfinity}
                               onClick={() => removeBand(tariffType, index)}
-                              className={`w-full px-3 py-2 rounded-lg border ${
+                              className={`w-full btn-secondary ${
                                 isInfinity
                                   ? "opacity-40 cursor-not-allowed"
-                                  : "hover:bg-gray-100"
+                                  : ""
                               }`}
                             >
                               Remove
@@ -377,7 +374,7 @@ export default function ECGBillCalculator() {
             </div>
           </section>
 
-          <section className="bg-white border rounded-2xl shadow-sm p-6">
+          <section className="glass card">
             <h2 className="text-lg font-semibold mb-4">Results</h2>
 
             {!results ? (
@@ -426,28 +423,28 @@ export default function ECGBillCalculator() {
               )}
                 </div>
 
-                <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
-                  <div className="text-sm text-blue-700">Final Amount Payable</div>
-                  <div className="text-2xl font-bold text-blue-800">GHS {results.payable.toFixed(2)}</div>
+                <div className="p-4 rounded-xl" style={{ background: "linear-gradient(180deg, rgba(0,51,161,0.10), rgba(0,51,161,0.06))", border: "1px solid var(--outline)" }}>
+                  <div className="text-sm" style={{ color: "var(--muted)" }}>Final Amount Payable</div>
+                  <div className="text-2xl font-bold" style={{ color: "var(--ecg-blue)" }}>GHS {results.payable.toFixed(2)}</div>
                 </div>
 
                 <div>
                   <h3 className="text-base font-semibold mb-2">Band Breakdown</h3>
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm border rounded-xl overflow-hidden">
-                      <thead className="bg-gray-50">
+                    <table className="w-full text-sm rounded-xl overflow-hidden" style={{ border: "1px solid var(--outline)" }}>
+                      <thead style={{ background: "var(--surface)" }}>
                         <tr>
-                          <th className="text-left p-2 border">Units (kWh)</th>
-                          <th className="text-left p-2 border">Rate (GHS/kWh)</th>
-                          <th className="text-left p-2 border">Cost (GHS)</th>
+                          <th className="text-left p-2" style={{ borderBottom: "1px solid var(--outline)" }}>Units (kWh)</th>
+                          <th className="text-left p-2" style={{ borderBottom: "1px solid var(--outline)" }}>Rate (GHS/kWh)</th>
+                          <th className="text-left p-2" style={{ borderBottom: "1px solid var(--outline)" }}>Cost (GHS)</th>
                         </tr>
                       </thead>
                       <tbody>
                         {results.bandBreakdown.map((b, i) => (
-                          <tr key={i} className="odd:bg-white even:bg-gray-50">
-                            <td className="p-2 border">{b.used}</td>
-                            <td className="p-2 border">{b.rate.toFixed(4)}</td>
-                            <td className="p-2 border">{b.cost.toFixed(2)}</td>
+                          <tr key={i}>
+                            <td className="p-2" style={{ borderTop: "1px solid var(--outline)" }}>{b.used}</td>
+                            <td className="p-2" style={{ borderTop: "1px solid var(--outline)" }}>{b.rate.toFixed(4)}</td>
+                            <td className="p-2" style={{ borderTop: "1px solid var(--outline)" }}>{b.cost.toFixed(2)}</td>
                           </tr>
                         ))}
                       </tbody>
