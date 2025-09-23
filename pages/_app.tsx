@@ -23,7 +23,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <div>
       <header className="sticky top-0 z-10 text-white shadow" style={{ background: "linear-gradient(90deg, var(--ecg-blue), #002277)" }}>
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-2 sm:gap-3 min-w-0">
           <img
             src="/official_ecg_logo.jpg"
             alt="ECG Logo"
@@ -31,9 +31,9 @@ export default function App({ Component, pageProps }: AppProps) {
             height={32}
             style={{ borderRadius: 8 }}
           />
-          <Link href="/" className="font-semibold">ECG Bill Calculator</Link>
-          <span className="ml-auto accent-pill">Beta</span>
-          <button onClick={toggleTheme} className="ml-3 btn-secondary" aria-label="Toggle theme">
+          <Link href="/" className="font-semibold truncate whitespace-nowrap flex-1 text-sm sm:text-base md:text-lg" title="ECG Bill Calculator">ECG Bill Calculator</Link>
+          <span className="accent-pill hidden sm:inline-block">Beta</span>
+          <button onClick={toggleTheme} className="ml-auto btn-secondary" aria-label="Toggle theme">
             {theme === "dark" ? "Light" : "Dark"}
           </button>
         </div>
