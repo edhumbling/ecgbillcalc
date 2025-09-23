@@ -405,7 +405,7 @@ export default function ECGBillCalculator() {
 
             <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
-                <span>Nat'l Elect Levy (2%)</span>
+                <span>Nat&#39;l Elect Levy (2%)</span>
                 <span>GHS {results.natElectLevy.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">

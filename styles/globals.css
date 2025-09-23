@@ -2,12 +2,18 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0a0a0a;
+  --ecg-blue: #0033a1;
+  --ecg-yellow: #ffcc00;
+  --ecg-white: #ffffff;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-ecg-blue: var(--ecg-blue);
+  --color-ecg-yellow: var(--ecg-yellow);
+  --color-ecg-white: var(--ecg-white);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -23,4 +29,12 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.btn-primary {
+  @apply bg-ecg-blue text-white hover:opacity-90;
+}
+
+.accent-pill {
+  @apply inline-block px-2 py-0.5 rounded-full bg-ecg-yellow text-ecg-blue text-xs font-semibold;
 }
