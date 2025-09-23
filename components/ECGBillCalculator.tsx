@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 type Band = { limit: number; rate: number };
 type TariffKey = "residential" | "nonResidential";
@@ -37,6 +37,21 @@ export default function ECGBillCalculator() {
   const [results, setResults] = useState<CalculationResults | null>(null);
   const [rates, setRates] = useState<Record<TariffKey, Band[]>>(initialRates);
   const [showRateEditor, setShowRateEditor] = useState<boolean>(false);
+  const [rememberReadings, setRememberReadings] = useState<boolean>(true);
+  const [savedPrevReading, setSavedPrevReading] = useState<number | null>(null);
+  const [savedCurrReading, setSavedCurrReading] = useState<number | null>(null);
+  const resultsRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    try {
+      const sp = localStorage.getItem("ecg_prev_reading");
+      const sc = localStorage.getItem("ecg_curr_reading");
+      if (sp !== null && !Number.isNaN(Number(sp))) setSavedPrevReading(Number(sp));
+      if (sc !== null && !Number.isNaN(Number(sc))) setSavedCurrReading(Number(sc));
+      const sr = localStorage.getItem("ecg_remember");
+      if (sr === "false") setRememberReadings(false);
+    } catch {}
+  }, []);
 
   const serviceChargeFlat: Record<TariffKey, number> = {
     residential: 2.13,
@@ -88,6 +103,23 @@ export default function ECGBillCalculator() {
       totalBill,
       payable,
     });
+
+    try {
+      if (rememberReadings) {
+        localStorage.setItem("ecg_prev_reading", String(prevReading));
+        localStorage.setItem("ecg_curr_reading", String(currReading));
+        localStorage.setItem("ecg_remember", "true");
+        setSavedPrevReading(prevReading);
+        setSavedCurrReading(currReading);
+      } else {
+        localStorage.setItem("ecg_remember", "false");
+      }
+    } catch {}
+
+    // Smoothly scroll to results after rendering
+    setTimeout(() => {
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 60);
   };
 
   const updateBand = (type: TariffKey, index: number, updates: Partial<Band>) => {
@@ -178,14 +210,50 @@ export default function ECGBillCalculator() {
               </div>
             </div>
 
+            {/* Remember readings toggle */}
+            <div className="mb-4 px-1">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={rememberReadings}
+                  aria-label="Remember readings"
+                  onClick={() => setRememberReadings(!rememberReadings)}
+                  className="relative inline-flex h-6 w-10 items-center rounded-full transition-colors focus:outline-none"
+                  style={{ background: rememberReadings ? "var(--ecg-blue)" : "var(--outline)" }}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition ${rememberReadings ? "translate-x-5" : "translate-x-1"}`}
+                  />
+                </button>
+                <div className="flex-1">
+                  <span className="text-sm">Remember readings (local)</span>
+                </div>
+              </div>
+            </div>
+
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="label" htmlFor="prevReading">Previous Reading (kWh)</label>
-                <input id="prevReading" type="number" value={prevReading} onChange={(e) => setPrevReading(Number(e.target.value))} className="input" />
+                <input id="prevReading" type="number" inputMode="decimal" pattern="[0-9]*" value={prevReading} onChange={(e) => setPrevReading(Number(e.target.value))} className="input" />
+                {prevReading === 0 && (
+                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs" style={{ color: "var(--muted)" }}>
+                    {savedPrevReading !== null && (
+                      <button type="button" className="btn-soft" onClick={() => setPrevReading(savedPrevReading!)}>
+                        Use saved: {savedPrevReading}
+                      </button>
+                    )}
+                    {savedPrevReading === null && savedCurrReading !== null && (
+                      <button type="button" className="btn-soft" onClick={() => setPrevReading(savedCurrReading!)}>
+                        Use last current: {savedCurrReading}
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
               <div>
                 <label className="label" htmlFor="currReading">Current Reading (kWh)</label>
-                <input id="currReading" type="number" value={currReading} onChange={(e) => setCurrReading(Number(e.target.value))} className="input" />
+                <input id="currReading" type="number" inputMode="decimal" pattern="[0-9]*" value={currReading} onChange={(e) => setCurrReading(Number(e.target.value))} className="input" />
               </div>
             </div>
 
@@ -275,7 +343,7 @@ export default function ECGBillCalculator() {
             </div>
           </section>
 
-          <section className="glass card rounded-none sm:rounded-2xl p-4 sm:p-6">
+          <section ref={resultsRef} className="glass card rounded-none sm:rounded-2xl p-4 sm:p-6">
             <h2 className="text-lg font-semibold mb-4">Results</h2>
 
             {!results ? (
@@ -326,7 +394,7 @@ export default function ECGBillCalculator() {
 
                 <div className="p-4 rounded-xl" style={{ background: "linear-gradient(180deg, rgba(0,51,161,0.10), rgba(0,51,161,0.06))", border: "1px solid var(--outline)" }}>
                   <div className="text-sm" style={{ color: "var(--muted)" }}>Final Amount Payable</div>
-                  <div className="text-2xl font-bold" style={{ color: "var(--ecg-blue)" }}>GHS {results.payable.toFixed(2)}</div>
+                  <div className="text-2xl font-bold final-amount">GHS {results.payable.toFixed(2)}</div>
                 </div>
 
                 <div>

@@ -66,6 +66,9 @@ body {
 .btn-warning { background: var(--ecg-yellow); color: var(--ecg-blue); }
 .btn-warning:hover { filter: brightness(1.05); }
 
+.final-amount { color: var(--ecg-blue); }
+[data-theme="dark"] .final-amount { color: var(--ecg-yellow); }
+
 .accent-pill {
   @apply inline-block px-2 py-0.5 rounded-full text-ecg-blue text-xs font-semibold;
   background: var(--ecg-yellow);
