@@ -215,13 +215,14 @@ export default function ECGBillCalculator() {
 
             <div className="mt-6 hidden sm:flex items-center gap-3">
               <button onClick={calculateBill} className="btn-primary">Calculate Bill</button>
-              <button onClick={() => { setPrevReading(0); setCurrReading(0); setBillingDays(31); setPrevBalance(0); setPayments(0); setResults(null); }} className="btn-secondary">Clear</button>
+              <button onClick={() => { setPrevReading(0); setCurrReading(0); setBillingDays(31); setPrevBalance(0); setPayments(0); setResults(null); }} className="btn-warning">Clear</button>
             </div>
 
-            <div className="fixed left-0 right-0 bottom-0 lg:hidden p-3" style={{ background: "linear-gradient(180deg, transparent, rgba(0,0,0,0.08))" }}>
+            {/* Mobile action bar: only visible while within the input panel area */}
+            <div className="sticky bottom-0 lg:hidden p-3" style={{ background: "linear-gradient(180deg, transparent, rgba(0,0,0,0.08))" }}>
               <div className="max-w-5xl mx-auto flex gap-3">
                 <button onClick={calculateBill} className="btn-primary flex-1">Calculate</button>
-                <button onClick={() => { setPrevReading(0); setCurrReading(0); setBillingDays(31); setPrevBalance(0); setPayments(0); setResults(null); }} className="btn-secondary">Clear</button>
+                <button onClick={() => { setPrevReading(0); setCurrReading(0); setBillingDays(31); setPrevBalance(0); setPayments(0); setResults(null); }} className="btn-warning">Clear</button>
               </div>
             </div>
 

@@ -62,6 +62,10 @@ body {
 .btn-danger-soft { background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.25); }
 [data-theme="dark"] .btn-danger-soft { background: rgba(239,68,68,0.16); border-color: rgba(239,68,68,0.35); }
 
+.btn-warning { @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold shadow transition; }
+.btn-warning { background: var(--ecg-yellow); color: var(--ecg-blue); }
+.btn-warning:hover { filter: brightness(1.05); }
+
 .accent-pill {
   @apply inline-block px-2 py-0.5 rounded-full text-ecg-blue text-xs font-semibold;
   background: var(--ecg-yellow);
