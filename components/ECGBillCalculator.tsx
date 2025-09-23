@@ -130,6 +130,21 @@ export default function ECGBillCalculator() {
   return (
     <div className="min-h-screen py-6 sm:py-10 px-0 sm:px-4 overflow-x-hidden">
       <div className="max-w-5xl mx-auto">
+        <div
+          className="mb-4 sm:mb-6 rounded-xl p-3 sm:p-4"
+          role="note"
+          style={{
+            background: "rgba(255,204,0,0.16)",
+            border: "1px solid rgba(255,204,0,0.35)",
+          }}
+        >
+          <div className="flex items-start gap-3">
+            <span className="accent-pill">Note</span>
+            <p className="text-sm leading-5 m-0" style={{ color: "var(--foreground)" }}>
+              This calculator is for ECG postpaid bills only. It does not apply to prepaid meters.
+            </p>
+          </div>
+        </div>
         <h1 className="text-3xl font-bold tracking-tight mb-6">ECG Bill Calculator</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
