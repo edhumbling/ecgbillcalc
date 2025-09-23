@@ -222,33 +222,33 @@ export default function ECGBillCalculator() {
                 <div className="mt-4">
                   <div className="flex items-center gap-3 mb-3 px-1">
                     <span className="text-sm text-gray-600">Editing:</span>
-                    <select value={tariffType} onChange={(e) => setTariffType(e.target.value as TariffKey)} className="input bg-white">
+                    <select value={tariffType} onChange={(e) => setTariffType(e.target.value as TariffKey)} className="input bg-white text-center">
                       <option value="residential">Residential</option>
                       <option value="nonResidential">Non-Residential</option>
                     </select>
-                    <button onClick={() => addBandBeforeInfinity(tariffType)} className="ml-auto btn-secondary text-sm">Add band</button>
-                    <button onClick={resetRates} className="btn-secondary text-sm">Reset to defaults</button>
+                    <button onClick={() => addBandBeforeInfinity(tariffType)} className="ml-auto btn-soft">Add band</button>
+                    <button onClick={resetRates} className="btn-soft">Reset</button>
                   </div>
 
                   <div className="space-y-3">
                     {rates[tariffType].map((band, index) => {
                       const isInfinity = band.limit === Infinity;
                       return (
-                        <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end glass p-3 rounded-none sm:rounded-xl">
-                          <div className="md:col-span-5 col-span-full">
+                        <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center glass p-3 rounded-none sm:rounded-xl">
+                          <div className="md:col-span-4 col-span-full">
                             <label className="label">Limit (kWh)</label>
                             {isInfinity ? (
-                              <div className="px-3 py-2 h-[38px] flex items-center input" style={{ background: "var(--surface)", color: "var(--muted)" }}>∞</div>
+                              <div className="px-3 py-2 h-[44px] flex items-center justify-center input" style={{ background: "var(--surface)", color: "var(--muted)" }}>∞</div>
                             ) : (
-                              <input type="number" value={Number.isFinite(band.limit) ? band.limit : 0} onChange={(e) => updateBand(tariffType, index, { limit: Number(e.target.value) })} className="input" />
+                              <input type="number" value={Number.isFinite(band.limit) ? band.limit : 0} onChange={(e) => updateBand(tariffType, index, { limit: Number(e.target.value) })} className="input text-center" />
                             )}
                           </div>
-                          <div className="md:col-span-5 col-span-full">
+                          <div className="md:col-span-4 col-span-full">
                             <label className="label">Rate (GHS/kWh)</label>
-                            <input type="number" step="0.0001" value={band.rate} onChange={(e) => updateBand(tariffType, index, { rate: Number(e.target.value) })} className="input" />
+                            <input type="number" step="0.0001" value={band.rate} onChange={(e) => updateBand(tariffType, index, { rate: Number(e.target.value) })} className="input text-center" />
                           </div>
-                          <div className="md:col-span-2 col-span-full">
-                            <button disabled={isInfinity} onClick={() => removeBand(tariffType, index)} className={`w-full btn-secondary ${isInfinity ? "opacity-40 cursor-not-allowed" : ""}`}>Remove</button>
+                          <div className="md:col-span-4 col-span-full flex md:justify-end">
+                            <button disabled={isInfinity} onClick={() => removeBand(tariffType, index)} className={`btn-danger-soft ${isInfinity ? "opacity-40 cursor-not-allowed" : ""}`}>Remove</button>
                           </div>
                         </div>
                       );

@@ -55,6 +55,13 @@ body {
 
 .btn-secondary { @apply px-5 py-2.5 rounded-xl border font-medium; border-color: var(--outline); }
 
+.btn-soft { @apply px-3 py-2 rounded-xl border text-sm; border-color: var(--outline); }
+.btn-soft:hover { background: rgba(0,0,0,0.03); }
+
+.btn-danger-soft { @apply rounded-xl text-sm font-medium px-3 py-2; }
+.btn-danger-soft { background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.25); }
+[data-theme="dark"] .btn-danger-soft { background: rgba(239,68,68,0.16); border-color: rgba(239,68,68,0.35); }
+
 .accent-pill {
   @apply inline-block px-2 py-0.5 rounded-full text-ecg-blue text-xs font-semibold;
   background: var(--ecg-yellow);
