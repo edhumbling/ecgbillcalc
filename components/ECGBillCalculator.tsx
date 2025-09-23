@@ -136,12 +136,31 @@ export default function ECGBillCalculator() {
           <section className="glass card rounded-none sm:rounded-2xl p-4 sm:p-6">
             <h2 className="text-lg font-semibold mb-4">Inputs</h2>
 
-            <div className="flex items-center justify-between mb-4">
-              <label className="flex items-center gap-2">
-                <input type="checkbox" className="h-4 w-4" checked={quickMode} onChange={() => setQuickMode(!quickMode)} />
-                <span>Quick Mode</span>
-              </label>
-              <span className="text-sm text-gray-500">Only previous and current readings (assumes 31 days, no arrears)</span>
+            <div className="mb-4 px-1">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={quickMode}
+                  aria-label="Toggle Quick Mode"
+                  onClick={() => setQuickMode(!quickMode)}
+                  className="relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none"
+                  style={{ background: quickMode ? "var(--ecg-blue)" : "var(--outline)" }}
+                >
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${quickMode ? "translate-x-6" : "translate-x-1"}`}
+                  />
+                </button>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">Quick Mode</span>
+                    <span className="accent-pill hidden md:inline-block">Fast</span>
+                  </div>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--muted)" }}>
+                    Enter previous and current kWh only (31 days, no arrears)
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
