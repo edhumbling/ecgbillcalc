@@ -50,7 +50,7 @@ export default function App({ Component, pageProps }: AppProps) {
             before relying on these results.
           </p>
           <p className="text-xs">
-            All rights reserved. Made with love by
+            © {new Date().getFullYear()} All rights reserved. Made with love by
             {" "}
             <a href="https://www.linkedin.com/in/edhumbling" target="_blank" rel="noopener noreferrer" className="underline hover:opacity-80">
               Emma
