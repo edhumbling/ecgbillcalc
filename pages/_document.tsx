@@ -4,8 +4,7 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head>
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="icon" type="image/x-icon" href="https://powerapp.ecg.com.gh/favicon.ico" />
+        <link rel="icon" href="/official_ecg_logo.jpg" />
         <meta name="theme-color" content="#0033a1" />
       </Head>
       <body className="antialiased">

@@ -25,10 +25,11 @@ export default function App({ Component, pageProps }: AppProps) {
       <header className="sticky top-0 z-10 text-white shadow" style={{ background: "linear-gradient(90deg, var(--ecg-blue), #002277)" }}>
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
           <img
-            src="https://powerapp.ecg.com.gh/favicon.ico"
+            src="/official_ecg_logo.jpg"
             alt="ECG Logo"
-            width={36}
-            height={36}
+            width={32}
+            height={32}
+            style={{ borderRadius: 8 }}
           />
           <Link href="/" className="font-semibold">ECG Bill Calculator</Link>
           <span className="ml-auto accent-pill">Beta</span>
