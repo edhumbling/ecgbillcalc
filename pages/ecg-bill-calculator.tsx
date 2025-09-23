@@ -8,8 +8,10 @@ type CalculationResults = {
   bandBreakdown: { used: number; rate: number; cost: number }[];
   energyCost: number;
   serviceCharge: number;
-  govLevy: number;
+  natElectLevy: number;
   streetLight: number;
+  nhilGetFund: number;
+  vat: number;
   totalBill: number;
   payable: number;
 };
@@ -21,10 +23,9 @@ const initialRates: Record<TariffKey, Band[]> = {
     { limit: 300, rate: 2.3 },
     { limit: Infinity, rate: 2.5 },
   ],
+  // May 2025 reckoner shows a flat energy rate for non-residential around 1.59 GHS/kWh
   nonResidential: [
-    { limit: 300, rate: 1.9 },
-    { limit: 300, rate: 2.3 },
-    { limit: Infinity, rate: 2.5 },
+    { limit: Infinity, rate: 1.59 },
   ],
 };
 
@@ -40,9 +41,20 @@ export default function ECGBillCalculator() {
   const [rates, setRates] = useState<Record<TariffKey, Band[]>>(initialRates);
   const [showRateEditor, setShowRateEditor] = useState<boolean>(false);
 
-  const serviceChargeRate = 0.3518;
-  const govLevyRate = 0.02;
+  // ECG May 2025 levy model (from reckoner):
+  // - Service charge: flat monthly charge (scaled by billing days)
+  // - Street Light: 3% of energy cost
+  // - Nat'l Elect Levy (NEL): 2% of energy cost
+  // - NHIL & GETFund: 5% of energy cost (Non-Residential only)
+  // - VAT (15%): applied on (energy + street light + NEL + NHIL&GET) (Non-Residential only)
+  const serviceChargeFlat: Record<TariffKey, number> = {
+    residential: 2.13,
+    nonResidential: 12.43,
+  };
   const streetLightRate = 0.03;
+  const nelRate = 0.02;
+  const nhilGetRate = 0.05; // non-res only
+  const vatRate = 0.15; // non-res only
 
   const calculateBill = () => {
     const units = Math.max(currReading - prevReading, 0);
@@ -64,10 +76,18 @@ export default function ECGBillCalculator() {
     const balance = quickMode ? 0 : prevBalance;
     const paid = quickMode ? 0 : payments;
 
-    const serviceCharge = serviceChargeRate * days;
-    const govLevy = energyCost * govLevyRate;
     const streetLight = energyCost * streetLightRate;
-    const totalBill = energyCost + serviceCharge + govLevy + streetLight;
+    const natElectLevy = energyCost * nelRate;
+    const nhilGetFund =
+      tariffType === "nonResidential" ? energyCost * nhilGetRate : 0;
+    const vatBase =
+      tariffType === "nonResidential"
+        ? energyCost + streetLight + natElectLevy + nhilGetFund
+        : 0;
+    const vat = tariffType === "nonResidential" ? vatBase * vatRate : 0;
+    const serviceCharge = serviceChargeFlat[tariffType] * (days / 31);
+    const totalBill =
+      energyCost + streetLight + natElectLevy + nhilGetFund + vat + serviceCharge;
     const payable = totalBill + balance - paid;
 
     setResults({
@@ -75,8 +95,10 @@ export default function ECGBillCalculator() {
       bandBreakdown,
       energyCost,
       serviceCharge,
-      govLevy,
+      natElectLevy,
       streetLight,
+      nhilGetFund,
+      vat,
       totalBill,
       payable,
     });
@@ -381,15 +403,27 @@ export default function ECGBillCalculator() {
                   </div>
                 </div>
 
-                <div className="space-y-1 text-sm">
+            <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
-                    <span>Gov Levy</span>
-                    <span>GHS {results.govLevy.toFixed(2)}</span>
+                <span>Nat'l Elect Levy (2%)</span>
+                <span>GHS {results.natElectLevy.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Street Light</span>
+                <span>Street Light (3%)</span>
                     <span>GHS {results.streetLight.toFixed(2)}</span>
                   </div>
+              {tariffType === "nonResidential" && (
+                <>
+                  <div className="flex justify-between">
+                    <span>NHIL & GETFund (5%)</span>
+                    <span>GHS {results.nhilGetFund.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>VAT (15%)</span>
+                    <span>GHS {results.vat.toFixed(2)}</span>
+                  </div>
+                </>
+              )}
                 </div>
 
                 <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
