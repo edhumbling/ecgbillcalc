@@ -43,7 +43,20 @@ export default function App({ Component, pageProps }: AppProps) {
       </main>
       <footer className="mt-10 py-6" style={{ borderTop: "1px solid var(--outline)" }}>
         <div className="max-w-6xl mx-auto px-4 text-sm" style={{ color: "var(--muted)" }}>
-          Built for demonstration purposes. Not affiliated with ECG.
+          <p className="mb-2">Built for demonstration purposes. Not affiliated with ECG.</p>
+          <p className="mb-2">
+            <strong>Disclaimer:</strong> Tariffs and charges may change over time. For the most
+            accurate and up-to-date rates, always verify with ECG&#39;s current published tariffs
+            before relying on these results.
+          </p>
+          <p className="text-xs">
+            All rights reserved. Made with love by
+            {" "}
+            <a href="https://www.linkedin.com/in/edhumbling" target="_blank" rel="noopener noreferrer" className="underline hover:opacity-80">
+              Emma
+            </a>
+            .
+          </p>
         </div>
       </footer>
     </div>
