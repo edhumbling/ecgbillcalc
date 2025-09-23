@@ -1,1 +1,5 @@
-export { default } from "../components/ECGBillCalculator";
+import ECGBillCalculator from "../components/ECGBillCalculator";
+
+export default function Home() {
+  return <ECGBillCalculator />;
+}
