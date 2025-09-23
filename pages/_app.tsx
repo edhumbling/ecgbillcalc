@@ -25,7 +25,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <header className="sticky top-0 z-10 text-white shadow" style={{ background: "linear-gradient(90deg, var(--ecg-blue), #002277)" }}>
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
           <img
-            src="https://www.ecg.com.gh/images/logo.png"
+            src="https://powerapp.ecg.com.gh/favicon.ico"
             alt="ECG Logo"
             width={36}
             height={36}

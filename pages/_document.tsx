@@ -5,7 +5,7 @@ export default function Document() {
     <Html lang="en">
       <Head>
         <link rel="icon" href="/favicon.ico" />
-        <link rel="icon" type="image/png" href="https://www.ecg.com.gh/images/logo.png" />
+        <link rel="icon" type="image/x-icon" href="https://powerapp.ecg.com.gh/favicon.ico" />
         <meta name="theme-color" content="#0033a1" />
       </Head>
       <body className="antialiased">
