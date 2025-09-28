@@ -48,6 +48,7 @@ export default function ECGBillCalculator() {
   const [currReading, setCurrReading] = useState<number>(0);
   const [billingDays, setBillingDays] = useState<number>(31);
   const [prevBalance, setPrevBalance] = useState<number>(0);
+  const [prevBalanceText, setPrevBalanceText] = useState<string>("");
   const [payments, setPayments] = useState<number>(0);
   const [adjustmentText, setAdjustmentText] = useState<string>("");
   const [tariffType, setTariffType] = useState<TariffKey>("residential");
@@ -64,9 +65,16 @@ export default function ECGBillCalculator() {
     try {
       const sp = localStorage.getItem("ecg_prev_reading");
       const sc = localStorage.getItem("ecg_curr_reading");
+      const sb = localStorage.getItem("ecg_prev_balance");
       const sa = localStorage.getItem("ecg_adjustment");
       if (sp !== null && !Number.isNaN(Number(sp))) setSavedPrevReading(Number(sp));
       if (sc !== null && !Number.isNaN(Number(sc))) setSavedCurrReading(Number(sc));
+      if (sb !== null) {
+        const sanitized = sanitizeAdjustmentInput(sb).replace(/^\+/, "");
+        setPrevBalanceText(sanitized);
+        const numeric = sanitized.trim() === "" ? 0 : Number(sanitized);
+        setPrevBalance(Number.isNaN(numeric) ? 0 : numeric);
+      }
       if (sa !== null) setAdjustmentText(sa);
       const sr = localStorage.getItem("ecg_remember");
       if (sr === "false") setRememberReadings(false);
@@ -132,6 +140,7 @@ export default function ECGBillCalculator() {
       if (rememberReadings) {
         localStorage.setItem("ecg_prev_reading", String(prevReading));
         localStorage.setItem("ecg_curr_reading", String(currReading));
+        localStorage.setItem("ecg_prev_balance", prevBalanceText);
         localStorage.setItem("ecg_adjustment", sanitizeAdjustmentInput(adjustmentText));
         localStorage.setItem("ecg_remember", "true");
         setSavedPrevReading(prevReading);
@@ -307,16 +316,41 @@ export default function ECGBillCalculator() {
                   <input id="billingDays" type="number" value={billingDays} onChange={(e) => setBillingDays(Number(e.target.value))} className="input" />
                 </div>
                 <div>
-                  <label className="label" htmlFor="prevBalance">Previous Balance (GHS)</label>
-                  <input
-                    id="prevBalance"
-                    type="number"
-                    inputMode="decimal"
-                    value={prevBalance === 0 ? "" : prevBalance}
-                    placeholder="0"
-                    onChange={(e) => setPrevBalance(e.target.value === "" ? 0 : Number(e.target.value))}
-                    className="input"
-                  />
+                  <label className="label flex items-center justify-between" htmlFor="prevBalance">
+                    <span>Previous Balance (GHS)</span>
+                    <span className="text-xs" style={{ color: "var(--muted)" }}>Can be credit (-)</span>
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      id="prevBalance"
+                      type="text"
+                      inputMode="decimal"
+                      value={prevBalanceText}
+                      placeholder="0"
+                      onChange={(e) => {
+                        const cleaned = sanitizeAdjustmentInput(e.target.value).replace(/^\+/, "");
+                        setPrevBalanceText(cleaned);
+                        const numeric = cleaned.trim() === "" ? 0 : Number(cleaned);
+                        setPrevBalance(Number.isNaN(numeric) ? 0 : numeric);
+                      }}
+                      className="input flex-1"
+                    />
+                    <button
+                      type="button"
+                      className="btn-soft text-base"
+                      onClick={() => {
+                        setPrevBalanceText((prev) => {
+                          const next = prev.trim().startsWith("-") ? prev.trim().slice(1) : "-" + (prev.trim() === "" ? "0" : prev.trim());
+                          const normalized = sanitizeAdjustmentInput(next).replace(/^\+/, "");
+                          const numeric = normalized.trim() === "" ? 0 : Number(normalized);
+                          setPrevBalance(Number.isNaN(numeric) ? 0 : numeric);
+                          return normalized;
+                        });
+                      }}
+                    >
+                      {prevBalanceText.trim().startsWith("-") ? "±" : "-"}
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label className="label" htmlFor="payments">Payments Made (GHS)</label>
@@ -369,14 +403,42 @@ export default function ECGBillCalculator() {
 
             <div className="mt-6 hidden sm:flex items-center gap-3">
               <button onClick={calculateBill} className="btn-primary">Calculate Bill</button>
-              <button onClick={() => { setPrevReading(0); setCurrReading(0); setBillingDays(31); setPrevBalance(0); setPayments(0); setAdjustmentText(""); setResults(null); }} className="btn-warning">Clear</button>
+              <button
+                onClick={() => {
+                  setPrevReading(0);
+                  setCurrReading(0);
+                  setBillingDays(31);
+                  setPrevBalance(0);
+                  setPrevBalanceText("");
+                  setPayments(0);
+                  setAdjustmentText("");
+                  setResults(null);
+                }}
+                className="btn-warning"
+              >
+                Clear
+              </button>
             </div>
 
             {/* Mobile action bar: only visible while within the input panel area */}
             <div className="sticky bottom-0 lg:hidden p-3" style={{ background: "linear-gradient(180deg, transparent, rgba(0,0,0,0.08))" }}>
               <div className="max-w-5xl mx-auto flex gap-3">
                 <button onClick={calculateBill} className="btn-primary flex-1">Calculate</button>
-                <button onClick={() => { setPrevReading(0); setCurrReading(0); setBillingDays(31); setPrevBalance(0); setPayments(0); setAdjustmentText(""); setResults(null); }} className="btn-warning">Clear</button>
+                <button
+                  onClick={() => {
+                    setPrevReading(0);
+                    setCurrReading(0);
+                    setBillingDays(31);
+                    setPrevBalance(0);
+                    setPrevBalanceText("");
+                    setPayments(0);
+                    setAdjustmentText("");
+                    setResults(null);
+                  }}
+                  className="btn-warning"
+                >
+                  Clear
+                </button>
               </div>
             </div>
 
