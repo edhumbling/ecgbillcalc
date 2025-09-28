@@ -27,13 +27,29 @@ const initialRates: Record<TariffKey, Band[]> = {
   nonResidential: [{ limit: Infinity, rate: 1.59 }],
 };
 
+const sanitizeAdjustmentInput = (raw: string) => {
+  let value = raw.replace(/[^0-9+.-]/g, "");
+  if (value.length === 0) return "";
+  const signMatch = value.match(/^[+-]/);
+  const sign = signMatch ? signMatch[0] : "";
+  value = sign + value.slice(sign.length).replace(/[+-]/g, "");
+  const unsigned = value.slice(sign.length);
+  const parts = unsigned.split(".");
+  const integerPart = parts[0];
+  const decimalPart = parts.slice(1).join("");
+  const normalizedInteger = integerPart.replace(/^0+(?=\d)/, "");
+  const trimmedInteger = normalizedInteger === "" && integerPart.includes("0") ? "0" : normalizedInteger;
+  const result = sign + trimmedInteger + (decimalPart ? "." + decimalPart : "");
+  return result;
+};
+
 export default function ECGBillCalculator() {
   const [prevReading, setPrevReading] = useState<number>(0);
   const [currReading, setCurrReading] = useState<number>(0);
   const [billingDays, setBillingDays] = useState<number>(31);
   const [prevBalance, setPrevBalance] = useState<number>(0);
   const [payments, setPayments] = useState<number>(0);
-  const [adjustment, setAdjustment] = useState<number>(0);
+  const [adjustmentText, setAdjustmentText] = useState<string>("");
   const [tariffType, setTariffType] = useState<TariffKey>("residential");
   const [quickMode, setQuickMode] = useState<boolean>(true);
   const [results, setResults] = useState<CalculationResults | null>(null);
@@ -51,7 +67,7 @@ export default function ECGBillCalculator() {
       const sa = localStorage.getItem("ecg_adjustment");
       if (sp !== null && !Number.isNaN(Number(sp))) setSavedPrevReading(Number(sp));
       if (sc !== null && !Number.isNaN(Number(sc))) setSavedCurrReading(Number(sc));
-      if (sa !== null && !Number.isNaN(Number(sa))) setAdjustment(Number(sa));
+      if (sa !== null) setAdjustmentText(sa);
       const sr = localStorage.getItem("ecg_remember");
       if (sr === "false") setRememberReadings(false);
     } catch {}
@@ -85,7 +101,9 @@ export default function ECGBillCalculator() {
     const days = quickMode ? 31 : billingDays;
     const balance = quickMode ? 0 : prevBalance;
     const paid = quickMode ? 0 : payments;
-    const adj = quickMode ? 0 : adjustment;
+    const normalizedAdjustment = sanitizeAdjustmentInput(adjustmentText);
+    const parsedAdjustment = normalizedAdjustment.trim() === "" ? 0 : Number(normalizedAdjustment);
+    const adj = quickMode || Number.isNaN(parsedAdjustment) ? 0 : parsedAdjustment;
 
     const streetLight = energyCost * streetLightRate;
     const natElectLevy = energyCost * nelRate;
@@ -114,7 +132,7 @@ export default function ECGBillCalculator() {
       if (rememberReadings) {
         localStorage.setItem("ecg_prev_reading", String(prevReading));
         localStorage.setItem("ecg_curr_reading", String(currReading));
-        localStorage.setItem("ecg_adjustment", String(adjustment));
+        localStorage.setItem("ecg_adjustment", sanitizeAdjustmentInput(adjustmentText));
         localStorage.setItem("ecg_remember", "true");
         setSavedPrevReading(prevReading);
         setSavedCurrReading(currReading);
@@ -242,7 +260,16 @@ export default function ECGBillCalculator() {
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="label" htmlFor="prevReading">Previous Reading (kWh)</label>
-                <input id="prevReading" type="number" inputMode="decimal" pattern="[0-9]*" value={prevReading} onChange={(e) => setPrevReading(Number(e.target.value))} className="input" />
+                  <input
+                    id="prevReading"
+                    type="number"
+                    inputMode="decimal"
+                    pattern="[0-9]*"
+                    value={prevReading === 0 ? "" : prevReading}
+                    placeholder="0"
+                    onChange={(e) => setPrevReading(e.target.value === "" ? 0 : Number(e.target.value))}
+                    className="input"
+                  />
                 {prevReading === 0 && (
                   <div className="mt-1 flex flex-wrap items-center gap-2 text-xs" style={{ color: "var(--muted)" }}>
                     {savedPrevReading !== null && (
@@ -260,7 +287,16 @@ export default function ECGBillCalculator() {
               </div>
               <div>
                 <label className="label" htmlFor="currReading">Current Reading (kWh)</label>
-                <input id="currReading" type="number" inputMode="decimal" pattern="[0-9]*" value={currReading} onChange={(e) => setCurrReading(Number(e.target.value))} className="input" />
+                <input
+                  id="currReading"
+                  type="number"
+                  inputMode="decimal"
+                  pattern="[0-9]*"
+                  value={currReading === 0 ? "" : currReading}
+                  placeholder="0"
+                  onChange={(e) => setCurrReading(e.target.value === "" ? 0 : Number(e.target.value))}
+                  className="input"
+                />
               </div>
             </div>
 
@@ -272,21 +308,51 @@ export default function ECGBillCalculator() {
                 </div>
                 <div>
                   <label className="label" htmlFor="prevBalance">Previous Balance (GHS)</label>
-                  <input id="prevBalance" type="number" value={prevBalance} onChange={(e) => setPrevBalance(Number(e.target.value))} className="input" />
+                  <input
+                    id="prevBalance"
+                    type="number"
+                    inputMode="decimal"
+                    value={prevBalance === 0 ? "" : prevBalance}
+                    placeholder="0"
+                    onChange={(e) => setPrevBalance(e.target.value === "" ? 0 : Number(e.target.value))}
+                    className="input"
+                  />
                 </div>
                 <div>
                   <label className="label" htmlFor="payments">Payments Made (GHS)</label>
-                  <input id="payments" type="number" value={payments} onChange={(e) => setPayments(Number(e.target.value))} className="input" />
-                </div>
-                <div>
-                  <label className="label" htmlFor="adjustment">Adjustments (GHS)</label>
                   <input
-                    id="adjustment"
+                    id="payments"
                     type="number"
-                    value={adjustment}
-                    onChange={(e) => setAdjustment(Number(e.target.value))}
+                    inputMode="decimal"
+                    value={payments === 0 ? "" : payments}
+                    placeholder="0"
+                    onChange={(e) => setPayments(e.target.value === "" ? 0 : Number(e.target.value))}
                     className="input"
                   />
+                </div>
+                <div>
+                  <label className="label flex items-center justify-between" htmlFor="adjustment">
+                    <span>Adjustments (GHS)</span>
+                    <span className="text-xs" style={{ color: "var(--muted)" }}>Use + or -</span>
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      id="adjustment"
+                      type="text"
+                      inputMode="decimal"
+                      value={adjustmentText}
+                      placeholder="e.g. -25.50"
+                      onChange={(e) => setAdjustmentText(sanitizeAdjustmentInput(e.target.value))}
+                      className="input flex-1"
+                    />
+                    <button
+                      type="button"
+                      className="btn-soft text-base"
+                      onClick={() => setAdjustmentText((prev) => (prev.startsWith("-") ? prev.slice(1) : "-" + (prev || "0")))}
+                    >
+                      {adjustmentText.trim().startsWith("-") ? "±" : "-"}
+                    </button>
+                  </div>
                   <p className="text-xs mt-1" style={{ color: "var(--muted)" }}>
                     Enter positive for surcharge, negative for credit.
                   </p>
@@ -303,14 +369,14 @@ export default function ECGBillCalculator() {
 
             <div className="mt-6 hidden sm:flex items-center gap-3">
               <button onClick={calculateBill} className="btn-primary">Calculate Bill</button>
-              <button onClick={() => { setPrevReading(0); setCurrReading(0); setBillingDays(31); setPrevBalance(0); setPayments(0); setAdjustment(0); setResults(null); }} className="btn-warning">Clear</button>
+              <button onClick={() => { setPrevReading(0); setCurrReading(0); setBillingDays(31); setPrevBalance(0); setPayments(0); setAdjustmentText(""); setResults(null); }} className="btn-warning">Clear</button>
             </div>
 
             {/* Mobile action bar: only visible while within the input panel area */}
             <div className="sticky bottom-0 lg:hidden p-3" style={{ background: "linear-gradient(180deg, transparent, rgba(0,0,0,0.08))" }}>
               <div className="max-w-5xl mx-auto flex gap-3">
                 <button onClick={calculateBill} className="btn-primary flex-1">Calculate</button>
-                <button onClick={() => { setPrevReading(0); setCurrReading(0); setBillingDays(31); setPrevBalance(0); setPayments(0); setAdjustment(0); setResults(null); }} className="btn-warning">Clear</button>
+                <button onClick={() => { setPrevReading(0); setCurrReading(0); setBillingDays(31); setPrevBalance(0); setPayments(0); setAdjustmentText(""); setResults(null); }} className="btn-warning">Clear</button>
               </div>
             </div>
 
@@ -344,12 +410,25 @@ export default function ECGBillCalculator() {
                             {isInfinity ? (
                               <div className="px-3 py-2 h-[44px] flex items-center justify-center input" style={{ background: "var(--surface)", color: "var(--muted)" }}>∞</div>
                             ) : (
-                              <input type="number" value={Number.isFinite(band.limit) ? band.limit : 0} onChange={(e) => updateBand(tariffType, index, { limit: Number(e.target.value) })} className="input text-center" />
+                              <input
+                                type="number"
+                                inputMode="decimal"
+                                value={Number.isFinite(band.limit) ? band.limit : 0}
+                                onChange={(e) => updateBand(tariffType, index, { limit: Number(e.target.value) })}
+                                className="input text-center"
+                              />
                             )}
                           </div>
                           <div className="md:col-span-4 col-span-full">
                             <label className="label">Rate (GHS/kWh)</label>
-                            <input type="number" step="0.0001" value={band.rate} onChange={(e) => updateBand(tariffType, index, { rate: Number(e.target.value) })} className="input text-center" />
+                            <input
+                              type="number"
+                              step="0.0001"
+                              inputMode="decimal"
+                              value={band.rate}
+                              onChange={(e) => updateBand(tariffType, index, { rate: Number(e.target.value) })}
+                              className="input text-center"
+                            />
                           </div>
                           <div className="md:col-span-4 col-span-full flex md:justify-end">
                             <button disabled={isInfinity} onClick={() => removeBand(tariffType, index)} className={`btn-danger-soft ${isInfinity ? "opacity-40 cursor-not-allowed" : ""}`}>Remove</button>
