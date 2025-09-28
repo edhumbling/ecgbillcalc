@@ -13,6 +13,7 @@ type CalculationResults = {
   nhilGetFund: number;
   vat: number;
   totalBill: number;
+  adjustment: number;
   payable: number;
 };
 
@@ -32,6 +33,7 @@ export default function ECGBillCalculator() {
   const [billingDays, setBillingDays] = useState<number>(31);
   const [prevBalance, setPrevBalance] = useState<number>(0);
   const [payments, setPayments] = useState<number>(0);
+  const [adjustment, setAdjustment] = useState<number>(0);
   const [tariffType, setTariffType] = useState<TariffKey>("residential");
   const [quickMode, setQuickMode] = useState<boolean>(true);
   const [results, setResults] = useState<CalculationResults | null>(null);
@@ -46,8 +48,10 @@ export default function ECGBillCalculator() {
     try {
       const sp = localStorage.getItem("ecg_prev_reading");
       const sc = localStorage.getItem("ecg_curr_reading");
+      const sa = localStorage.getItem("ecg_adjustment");
       if (sp !== null && !Number.isNaN(Number(sp))) setSavedPrevReading(Number(sp));
       if (sc !== null && !Number.isNaN(Number(sc))) setSavedCurrReading(Number(sc));
+      if (sa !== null && !Number.isNaN(Number(sa))) setAdjustment(Number(sa));
       const sr = localStorage.getItem("ecg_remember");
       if (sr === "false") setRememberReadings(false);
     } catch {}
@@ -81,6 +85,7 @@ export default function ECGBillCalculator() {
     const days = quickMode ? 31 : billingDays;
     const balance = quickMode ? 0 : prevBalance;
     const paid = quickMode ? 0 : payments;
+    const adj = quickMode ? 0 : adjustment;
 
     const streetLight = energyCost * streetLightRate;
     const natElectLevy = energyCost * nelRate;
@@ -89,7 +94,7 @@ export default function ECGBillCalculator() {
     const vat = tariffType === "nonResidential" ? vatBase * vatRate : 0;
     const serviceCharge = serviceChargeFlat[tariffType] * (days / 31);
     const totalBill = energyCost + streetLight + natElectLevy + nhilGetFund + vat + serviceCharge;
-    const payable = totalBill + balance - paid;
+    const payable = totalBill + balance - paid + adj;
 
     setResults({
       units,
@@ -101,6 +106,7 @@ export default function ECGBillCalculator() {
       nhilGetFund,
       vat,
       totalBill,
+      adjustment: adj,
       payable,
     });
 
@@ -108,6 +114,7 @@ export default function ECGBillCalculator() {
       if (rememberReadings) {
         localStorage.setItem("ecg_prev_reading", String(prevReading));
         localStorage.setItem("ecg_curr_reading", String(currReading));
+        localStorage.setItem("ecg_adjustment", String(adjustment));
         localStorage.setItem("ecg_remember", "true");
         setSavedPrevReading(prevReading);
         setSavedCurrReading(currReading);
@@ -272,6 +279,19 @@ export default function ECGBillCalculator() {
                   <input id="payments" type="number" value={payments} onChange={(e) => setPayments(Number(e.target.value))} className="input" />
                 </div>
                 <div>
+                  <label className="label" htmlFor="adjustment">Adjustments (GHS)</label>
+                  <input
+                    id="adjustment"
+                    type="number"
+                    value={adjustment}
+                    onChange={(e) => setAdjustment(Number(e.target.value))}
+                    className="input"
+                  />
+                  <p className="text-xs mt-1" style={{ color: "var(--muted)" }}>
+                    Enter positive for surcharge, negative for credit.
+                  </p>
+                </div>
+                <div>
                   <label className="label" htmlFor="tariffType">Tariff Type</label>
                   <select id="tariffType" value={tariffType} onChange={(e) => setTariffType(e.target.value as TariffKey)} className="input bg-white">
                     <option value="residential">Residential</option>
@@ -283,14 +303,14 @@ export default function ECGBillCalculator() {
 
             <div className="mt-6 hidden sm:flex items-center gap-3">
               <button onClick={calculateBill} className="btn-primary">Calculate Bill</button>
-              <button onClick={() => { setPrevReading(0); setCurrReading(0); setBillingDays(31); setPrevBalance(0); setPayments(0); setResults(null); }} className="btn-warning">Clear</button>
+              <button onClick={() => { setPrevReading(0); setCurrReading(0); setBillingDays(31); setPrevBalance(0); setPayments(0); setAdjustment(0); setResults(null); }} className="btn-warning">Clear</button>
             </div>
 
             {/* Mobile action bar: only visible while within the input panel area */}
             <div className="sticky bottom-0 lg:hidden p-3" style={{ background: "linear-gradient(180deg, transparent, rgba(0,0,0,0.08))" }}>
               <div className="max-w-5xl mx-auto flex gap-3">
                 <button onClick={calculateBill} className="btn-primary flex-1">Calculate</button>
-                <button onClick={() => { setPrevReading(0); setCurrReading(0); setBillingDays(31); setPrevBalance(0); setPayments(0); setResults(null); }} className="btn-warning">Clear</button>
+                <button onClick={() => { setPrevReading(0); setCurrReading(0); setBillingDays(31); setPrevBalance(0); setPayments(0); setAdjustment(0); setResults(null); }} className="btn-warning">Clear</button>
               </div>
             </div>
 
@@ -364,7 +384,7 @@ export default function ECGBillCalculator() {
                     <div className="text-xl font-semibold">GHS {results.serviceCharge.toFixed(2)}</div>
                   </div>
                   <div className="border rounded-xl p-3">
-                    <div className="text-xs text-gray-500 break-words">Total Bill</div>
+                  <div className="text-xs text-gray-500 break-words">Total Bill</div>
                     <div className="text-xl font-semibold">GHS {results.totalBill.toFixed(2)}</div>
                   </div>
                 </div>
@@ -378,6 +398,12 @@ export default function ECGBillCalculator() {
                     <span className="break-words">Street Light (3%)</span>
                     <span>GHS {results.streetLight.toFixed(2)}</span>
                   </div>
+                  {!quickMode && (
+                    <div className="flex justify-between">
+                      <span className="break-words">Adjustments</span>
+                      <span>GHS {results.adjustment.toFixed(2)}</span>
+                    </div>
+                  )}
                   {tariffType === "nonResidential" && (
                     <>
                       <div className="flex justify-between">
